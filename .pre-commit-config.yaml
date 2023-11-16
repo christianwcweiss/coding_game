@@ -1,0 +1,26 @@
+---
+default_language_version:
+  python: python3.10
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        args: [-l 120]
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.9.0
+    hooks:
+      - id: reorder-python-imports
+        args:
+          - --application-directories=src
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.2.2
+    hooks:
+      - id: yamlfmt
+        args: [--offset, '2', --mapping, '2', --sequence, '4']
