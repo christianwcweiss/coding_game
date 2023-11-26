@@ -4,9 +4,9 @@ import main
 import pytest
 
 TEST_CASES_POWERS_OF_PRIME = [
-    [3, 3, 3],
-    [3, 9, 9],
-    [3, 27, 27],
+    [3, 3, 3],  # 6
+    [3, 9, 9],  # 36
+    [3, 27, 27],  # 216
     [3, 81, 81],
     [3, 243, 243],
     [5, 5, 5],
@@ -48,25 +48,12 @@ TEST_CASES_ROWS_EQUALS_COLUMNS = [
 
 
 class TestSolution:
-    @staticmethod
-    def solve_brute_force(p: int, rows: int, columns: int) -> int:
-        triangle = main.Solution.create_pascal_triangle(rows)
-        nodes = 0
-        for row in triangle:
-            for i, column in enumerate(row):
-                if i >= columns:
-                    break
-                if column % p != 0:
-                    nodes += 1
-
-        return nodes
-
     @pytest.mark.parametrize(
         "p, rows, columns",
         TEST_CASES_POWERS_OF_PRIME + TEST_CASES_ROWS_EQUALS_COLUMNS,
     )
     def test_solve_method(self, p: int, rows: int, columns: int) -> None:
-        expected = TestSolution.solve_brute_force(p=p, rows=rows, columns=columns)
+        expected = main.Solution.solve_brute_force(p=p, rows=rows, columns=columns)
 
         result = main.Solution().solve(p=p, rows=rows, columns=columns)
 
@@ -98,12 +85,12 @@ class TestSolution:
 
     def test_lucas_theorem(self) -> None:
         triangle = main.Solution.create_pascal_triangle(100)
-        for prime in main.Solution.PRIMES:
+        for prime in main.PRIMES:
             for i, row in enumerate(triangle):
                 for j, column in enumerate(row):
                     assert main.Solution().lucas_theorem(p=prime, row=i, column=j) == bool(triangle[i][j] % prime == 0)
 
-    @pytest.mark.parametrize("prime", [3, 5, 7])
+    @pytest.mark.parametrize("prime", [3, 5, 7, 11, 13, 17])
     def test_divisible_numbers_in_row(self, prime: int) -> None:
         triangle = main.Solution.create_pascal_triangle(100)
         for i, row in enumerate(triangle):
@@ -123,7 +110,7 @@ class TestSolution:
         ],
     )
     def test_iterations_of_max_rows_in_testcases(self, prime: int, expected: int) -> None:
-        max_rows = 10**19
+        max_rows = main.MAX_ROWS
         iterations = 0
 
         while max_rows > 0:
@@ -131,3 +118,9 @@ class TestSolution:
             iterations += 1
 
         assert iterations == expected
+
+    @pytest.mark.parametrize("p", main.PRIMES)
+    def test_find_sizes_and_nodes(self, p: int) -> None:
+        sizes_and_nodes = main.Solution.find_triangle_sizes_and_nodes(p=p)
+
+        print(sizes_and_nodes)

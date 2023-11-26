@@ -1,10 +1,35 @@
 import math
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 
+PRIMES = {3, 5, 7, 11, 13, 17}
+MAX_ROWS = 10**19
+
+
 class Solution:
-    PRIMES = {3, 5, 7, 11, 13, 17}
+    @staticmethod
+    def solve_brute_force(p: int, rows: int, columns: int) -> int:
+        triangle = Solution.create_pascal_triangle(rows)
+        nodes = 0
+        for row in triangle:
+            for i, column in enumerate(row):
+                if i >= columns:
+                    break
+                if column % p != 0:
+                    nodes += 1
+
+        return nodes
+
+    @staticmethod
+    def find_triangle_sizes_and_nodes(p: int) -> List[Tuple[int, int]]:
+        s = sum(i for i in range(p + 1))
+        sizes = [(s, p)]  # (nodes, height)
+        while sizes[-1][1] <= MAX_ROWS:
+            sizes.append((sizes[-1][0] * s, sizes[-1][1] * p))
+
+        return sizes
 
     @staticmethod
     def create_pascal_triangle(rows: int) -> List[List[int]]:
@@ -64,12 +89,10 @@ class Solution:
 
     @staticmethod
     def divisible_numbers_in_row(p: int, row: int) -> int:
-        if p not in {3, 5, 7}:
-            raise ValueError(f"p must be 3, 5 or 7, but was {p}")
-
-        if p <= row:
+        if row >= p:
             result = 1
-            for number in [int(c) + 1 for c in "".join([str(c) for c in Solution.convert_base(row, p)])]:
+            converted_base = Solution.convert_base(row, p)
+            for number in [base + 1 for base in converted_base]:
                 result *= number
 
             return row + 1 - result
@@ -80,52 +103,67 @@ class Solution:
     def subdivisions(
         p: int,
         rows: int,
-        columns: int,
-        min_triangle_nodes: int,
-        min_triangle_height: int,
-        bottom_triangles: int,
-        triangle_nodes: int,
-        height: int,
+        max_rows: int,
+        total_nodes: int,
+        iteration: int,
+        sizes_and_nodes: List[Tuple[int, int]],
+        last_size: Optional[int] = None,
+        size_has_changed: bool = True,
     ) -> int:
-        print(
-            f"p: {p}, rows: {rows}, columns: {columns}, min_triangle_nodes: {min_triangle_nodes}, min_triangle_height: {min_triangle_height}, bottom_triangles: {bottom_triangles}, triangle_nodes: {triangle_nodes}, height: {height}"
-        )
-        if height >= rows:
-            return triangle_nodes
+        if rows == 0:
+            return total_nodes
 
-        if bottom_triangles % p == 0:
-            min_triangle_nodes *= sum(num for num in range(p + 1))
-            min_triangle_height = height
-        else:
-            triangle_nodes += min_triangle_nodes * ((bottom_triangles % p) + 1)
-            height += min_triangle_height
+        if rows < p or not size_has_changed:
+            nodes_in_row = (max_rows - rows + 1) - Solution.divisible_numbers_in_row(p=p, row=max_rows - rows)
+            total_nodes += nodes_in_row
+            return Solution.subdivisions(
+                p=p,
+                rows=rows - 1,
+                max_rows=max_rows,
+                total_nodes=total_nodes,
+                iteration=iteration,
+                sizes_and_nodes=sizes_and_nodes,
+                last_size=last_size,
+                size_has_changed=size_has_changed,
+            )
 
-        bottom_triangles += 1
-        bottom_triangles %= p
+        nodes, size = [(nodes, size) for nodes, size in sizes_and_nodes if size <= rows][-1]
+        if size == last_size:
+            return Solution.subdivisions(
+                p=p,
+                rows=rows,
+                max_rows=max_rows,
+                total_nodes=total_nodes,
+                iteration=iteration,
+                sizes_and_nodes=sizes_and_nodes,
+                last_size=last_size,
+                size_has_changed=False,
+            )
+
+        total_nodes += nodes * iteration
 
         return Solution.subdivisions(
             p=p,
-            rows=rows,
-            columns=columns,
-            min_triangle_nodes=min_triangle_nodes,
-            min_triangle_height=min_triangle_height,
-            bottom_triangles=bottom_triangles,
-            triangle_nodes=triangle_nodes,
-            height=height,
+            rows=rows - size,
+            max_rows=max_rows,
+            total_nodes=total_nodes,
+            iteration=iteration + 1,
+            sizes_and_nodes=sizes_and_nodes,
+            last_size=size,
+            size_has_changed=size != last_size,
         )
 
     @staticmethod
     def solve(p: int, rows: int, columns: int) -> int:
-        smallest_triangle_nodes = Solution.number_of_nodes(p, columns)
-        triangle_nodes = Solution.subdivisions(
+        sizes_and_nodes = Solution.find_triangle_sizes_and_nodes(p=p)
+
+        return Solution.subdivisions(
             p=p,
             rows=rows,
-            columns=columns,
-            min_triangle_nodes=smallest_triangle_nodes,
-            min_triangle_height=p,
-            bottom_triangles=1,
-            triangle_nodes=smallest_triangle_nodes,
-            height=p,
+            max_rows=rows,
+            total_nodes=0,
+            iteration=1,
+            sizes_and_nodes=sizes_and_nodes,
+            last_size=None,
+            size_has_changed=True,
         )
-
-        return triangle_nodes
