@@ -110,6 +110,7 @@ class Solution:
         last_size: Optional[int] = None,
         size_has_changed: bool = True,
     ) -> int:
+        print(f"rows: {rows}, total_nodes: {total_nodes}, iteration: {iteration}, last_size: {last_size}")
         if rows == 0:
             return total_nodes
 
