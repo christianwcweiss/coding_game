@@ -5,6 +5,9 @@ Beware:
 * The dot alone must not end a number, at least a digit is needed. For example, 98742. is refused, write 9874.2 instead.
 * Trailing and leading zeros must be removed. Write -4 instead of -4.0000 and -5.65 instead of -5.6500.
 
+# Link:
+https://www.codingame.com/ide/puzzle/the-greatest-number
+
 # Input
 * `n: int`
 * `_input: str`
