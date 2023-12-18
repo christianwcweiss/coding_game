@@ -5,7 +5,7 @@ class Solution:
     @staticmethod
     def solve(n: int) -> List[str]:
         result = set()
-        st = [([n-i], n-(n-i)) for i in range(n)]
+        st = [([n - i], n - (n - i)) for i in range(n)]
         while st:
             l, remaining = st.pop()
             if remaining < 0:
@@ -18,5 +18,3 @@ class Solution:
                         st.append((l + [i], remaining - i))
 
         return sorted(result, reverse=True)
-
-
