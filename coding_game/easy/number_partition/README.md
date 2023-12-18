@@ -18,5 +18,8 @@ Output all integer partitions of n in reverse lexicographic order. The integers 
 # Output
 * `List[str]`
 
+# Link
+* https://www.codingame.com/training/easy/number-partition
+
 # Youtube
 Check out: tbd
